@@ -1,0 +1,53 @@
+# ─── Python ──────────────────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# ─── Jupyter ─────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# ─── Node / Next.js ──────────────────────────────────────────────────────────
+web/node_modules/
+web/.next/
+web/tsconfig.tsbuildinfo
+
+# ─── Environment / secrets ───────────────────────────────────────────────────
+.env
+.env.local
+.env*.local
+*.env
+
+# ─── Large / unused data files ───────────────────────────────────────────────
+FinnUp_Borrowers.xlsx
+to_be_filled_Updated.xlsx
+data/raw/
+data/labels/
+# Capstone_Consol Sheet_22.05.2026.xlsx is intentionally committed — required by the API
+
+# ─── Generated / build outputs (not source) ──────────────────────────────────
+streamlit_error.log
+*.log
+Assumptions.png
+High Level Contextual Diagram.png
+APAL Cohort*
+Project Summary.docx
+create_zip.ps1
+outputs/*.png
+outputs/*.pptx
+outputs/*.pdf
+
+# outputs/models/ is intentionally NOT ignored — trained models ship with app
+
+# ─── OS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,265 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy:  #1B3A6B;
+  --teal:  #0D9488;
+  --amber: #F59E0B;
+  --green: #16A34A;
+  --red:   #EF4444;
+  --muted: #94A3B8;
+}
+
+@layer base {
+  body {
+    background-color: #F0F4F8;
+    color: #1E293B;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  * { @apply antialiased; }
+}
+
+@layer components {
+  /* ── Navigation Tabs ──────────────────────── */
+  .nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4375rem;
+    padding: 0.5625rem 1rem;
+    margin: 0.5rem 0.1875rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    border: 1.5px solid transparent;
+    transition: background 150ms, color 150ms, border-color 150ms;
+    white-space: nowrap;
+    color: rgba(255,255,255,0.55);
+    background: transparent;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  .nav-tab:hover {
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.12);
+  }
+  .nav-tab.active {
+    color: #0F172A;
+    background: #5EEAD4;
+    border-color: transparent;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(94,234,212,0.4);
+  }
+
+  /* ── Cards ────────────────────────────────── */
+  .card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    border: 1px solid #E2E8F0;
+    padding: 1.5rem;
+  }
+  .card-sm {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid #E2E8F0;
+    padding: 1rem;
+  }
+
+  /* ── Metric Cards ─────────────────────────── */
+  .metric-card {
+    border-radius: 0.875rem;
+    padding: 1.25rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ── Form Elements ────────────────────────── */
+  .form-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .form-input {
+    width: 100%;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: #1E293B;
+    background: white;
+    transition: border-color 150ms, box-shadow 150ms;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: #0D9488;
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+  }
+  .form-select {
+    width: 100%;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: #1E293B;
+    background: white;
+    transition: border-color 150ms, box-shadow 150ms;
+    outline: none;
+    cursor: pointer;
+    appearance: auto;
+  }
+  .form-select:focus {
+    border-color: #0D9488;
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+  }
+
+  /* ── Buttons ──────────────────────────────── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #0D9488 0%, #0b7a70 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.625rem;
+    border: none;
+    cursor: pointer;
+    transition: all 150ms;
+    box-shadow: 0 2px 8px rgba(13,148,136,0.35);
+    width: 100%;
+    text-decoration: none;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0b8079 0%, #096b61 100%);
+    box-shadow: 0 4px 14px rgba(13,148,136,0.4);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: white;
+    color: #0D9488;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    border: 1.5px solid #0D9488;
+    cursor: pointer;
+    transition: all 150ms;
+  }
+  .btn-secondary:hover { background: #F0FDFA; }
+
+  /* ── Section Headings ─────────────────────── */
+  .section-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #1B3A6B;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #E2E8F0;
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── Lender Rank Cards ────────────────────── */
+  .rank-card {
+    border-radius: 1rem;
+    padding: 1.25rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    transition: transform 150ms, box-shadow 150ms;
+  }
+  .rank-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  }
+  .rank-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    pointer-events: none;
+  }
+
+  /* ── Badge ────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* ── Slider ───────────────────────────────── */
+  input[type="range"] {
+    accent-color: #0D9488;
+    width: 100%;
+    cursor: pointer;
+  }
+  .slider-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #0D9488;
+    min-width: 3rem;
+    text-align: right;
+  }
+
+  /* ── Table ────────────────────────────────── */
+  .data-table { @apply w-full text-sm; }
+  .data-table thead tr {
+    background: #F8FAFC;
+  }
+  .data-table th {
+    padding: 0.75rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748B;
+    border-bottom: 1px solid #E2E8F0;
+  }
+  .data-table td {
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid #F1F5F9;
+    color: #334155;
+  }
+  .data-table tbody tr:hover { background: #EFF6FF; }
+  .data-table tbody tr[style*="pointer"]:hover { background: #DBEAFE; }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}

@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.git/
+web/node_modules/
+web/.next/
+*.log
+.streamlit/
+notebooks/
