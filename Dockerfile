@@ -32,7 +32,7 @@ COPY --from=web-builder /web/node_modules /app/web/node_modules
 # Supervisor config
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Fly.io expects port 3000 (Next.js is the public face)
-EXPOSE 3000
+# HuggingFace Spaces / Fly.io expects this port (Next.js is the public face)
+EXPOSE 7860
 
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
