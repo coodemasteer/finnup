@@ -113,7 +113,10 @@ export default function LoanAnalysis() {
   useEffect(() => {
     setLoading(true)
     fetch('/api/loan-analysis')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) return r.text().then(t => Promise.reject(t || `HTTP ${r.status}`))
+        return r.json()
+      })
       .then(d => { setData(d); setLoading(false) })
       .catch(e => { setError(String(e)); setLoading(false) })
   }, [])

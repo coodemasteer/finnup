@@ -9,9 +9,9 @@ RUN npm run build
 # ── Stage 2: Final image (Python + Node for Next.js production) ─────────────
 FROM python:3.11-slim
 
-# Install Node.js and supervisor
+# Install Node.js, supervisor, and LightGBM system deps (libgomp1, libstdc++)
 RUN apt-get update && \
-    apt-get install -y curl supervisor && \
+    apt-get install -y curl supervisor libgomp1 libstdc++6 && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
