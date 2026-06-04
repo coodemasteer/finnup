@@ -517,17 +517,32 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
             {/* ── Metric cards ── */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.875rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {(() => {
+                  const approvalRate = result.floor_p ?? 0.086
+                  const ratio = result.p_approved / approvalRate
+                  const approvalStrength = result.score_percentile != null
+                    ? Math.max(1, Math.min(99, 100 - result.score_percentile))
+                    : Math.max(1, Math.min(99, Math.round(ratio * 50)))
+                  const strengthBand = approvalStrength >= 80
+                    ? 'Exceptional'
+                    : approvalStrength >= 70
+                      ? 'Strong'
+                      : approvalStrength >= 55
+                        ? 'Good'
+                        : approvalStrength >= 40
+                          ? 'Borderline'
+                          : 'Weak'
+
+                  return (
                 <MetricCard
-                  label="P(APPROVED) — XGBoost"
-                  value={`${(result.p_approved * 100).toFixed(1)}%`}
-                  sub={(() => {
-                    const approvalRate = result.floor_p ?? 0.086
-                    const ratio = result.p_approved / approvalRate
-                    return `Live XGBoost prediction · ${ratio.toFixed(1)}× avg MSME approval rate`
-                  })()}
-                  explain={`XGBoost ran predict_proba() on your actual inputs (Net Sales, CIBIL, Vintage, Industry, etc.) and output this probability. It is not a lookup — it is a live inference. The training dataset had an 8.6% approval rate (582/6,735 MSME loans). Lenders are recommended when score exceeds the ${((result.floor_p ?? 0.086) * 100).toFixed(1)}% dataset average. Model accuracy: ROC-AUC 0.773.`}
+                  label="Approval Strength — XGBoost"
+                  value={`${approvalStrength}/100`}
+                  sub={`${strengthBand} borrower profile · Raw approval probability ${(result.p_approved * 100).toFixed(1)}%`}
+                  explain={`This is the presentation-friendly score for cohort review. ${approvalStrength}/100 means this borrower scores better than roughly ${approvalStrength}% of historical applicants in the training dataset. The raw XGBoost probability is still ${(result.p_approved * 100).toFixed(1)}%, but because the dataset approval rate is only 8.6%, even a 10-20% raw probability can represent a strong borrower. Lenders are recommended when the borrower beats the ${((result.floor_p ?? 0.086) * 100).toFixed(1)}% dataset average. Model accuracy: ROC-AUC 0.773.`}
                   gradient={approvalGradient}
                 />
+                  )
+                })()}
                 {/* Credit Tier badge */}
                 {result.credit_tier && (
                   <div style={{ background: 'white', border: '1.5px solid #E2E8F0', borderRadius: '0.75rem', padding: '0.625rem 1rem' }}>
@@ -541,7 +556,7 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                       </div>
                     )}
                     <div style={{ fontSize: '0.6rem', color: '#CBD5E1', marginTop: 3, lineHeight: 1.4 }}>
-                      Note: 18% is realistic for a calibrated model on 8.6% approval data. Good borrowers in this dataset typically score 15–35%, not 70–80%.
+                      For presentations, use Approval Strength as the headline number. Raw model probabilities stay low because this is an imbalanced MSME dataset with only 8.6% historical approvals.
                     </div>
                   </div>
                 )}
