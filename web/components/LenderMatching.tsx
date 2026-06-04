@@ -1011,7 +1011,7 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
             </div>
 
             {/* ── XAI Section ── */}
-            {(result.shap || result.lime) && (
+            {(result.shap || result.lime || result.bullets) && (
               <div className="card">
                 <h3 style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1B3A6B', marginBottom: '1rem' }}>
                   Why this score? — SHAP &amp; LIME Explanations
@@ -1077,6 +1077,38 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                   </>
                 )}
 
+                {xaiTab === 'shap' && (!result.shap || result.shap.length === 0) && (
+                  <div style={{
+                    background: '#FFF7ED',
+                    border: '1px solid #FED7AA',
+                    borderRadius: '0.875rem',
+                    padding: '1rem 1.125rem',
+                  }}>
+                    <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#9A3412', marginBottom: '0.35rem' }}>
+                      SHAP report is not available for this prediction yet
+                    </p>
+                    <p style={{ fontSize: '0.76rem', color: '#9A3412', lineHeight: 1.6, marginBottom: result.bullets ? '0.875rem' : 0 }}>
+                      The prediction completed, but the signed feature-attribution chart was not returned by the backend for this run.
+                      The business explanation below is still derived from the same model inputs.
+                    </p>
+                    {result.bullets && result.bullets.length > 0 && (
+                      <div style={{ background: 'white', borderRadius: '0.75rem', padding: '0.875rem 1rem', border: '1px solid #FFEDD5' }}>
+                        <h4 style={{ fontWeight: 700, fontSize: '0.8rem', color: '#1B3A6B', marginBottom: '0.55rem' }}>
+                          Available explanation summary
+                        </h4>
+                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingLeft: 0, listStyle: 'none', margin: 0 }}>
+                          {result.bullets.map((b, i) => (
+                            <li key={i} style={{ fontSize: '0.82rem', color: '#334155', display: 'flex', gap: '0.5rem' }}>
+                              <span style={{ color: '#0D9488', flexShrink: 0 }}>→</span>
+                              <span dangerouslySetInnerHTML={{ __html: b.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {xaiTab === 'lime' && result.lime && (
                   <>
                     <p style={{ fontSize: '0.78rem', color: '#64748B', marginBottom: '1rem' }}>
@@ -1109,6 +1141,23 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                       </span>
                     </div>
                   </>
+                )}
+
+                {xaiTab === 'lime' && (!result.lime || result.lime.length === 0) && (
+                  <div style={{
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '0.875rem',
+                    padding: '1rem 1.125rem',
+                  }}>
+                    <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1E293B', marginBottom: '0.35rem' }}>
+                      LIME report is not available for this prediction yet
+                    </p>
+                    <p style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
+                      The local perturbation-based explanation did not come back from the backend for this run.
+                      Once the deployment finishes rebuilding with the restored explainability dependencies, this chart should return automatically.
+                    </p>
+                  </div>
                 )}
               </div>
             )}

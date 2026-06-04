@@ -29,10 +29,52 @@ export default function LoginGate({ children }: { children: React.ReactNode }) {
     }
   }
 
+  function handleSignOut() {
+    sessionStorage.removeItem(SESSION_KEY)
+    setPass('')
+    setError('')
+    setAuthed(false)
+  }
+
   // Still checking sessionStorage
   if (authed === null) return null
 
-  if (authed) return <>{children}</>
+  if (authed) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          style={{
+            position: 'fixed',
+            top: 18,
+            right: 18,
+            zIndex: 1000,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '0.625rem 0.9rem',
+            borderRadius: '9999px',
+            border: '1px solid rgba(15,23,42,0.08)',
+            background: 'rgba(255,255,255,0.92)',
+            color: '#0F172A',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            boxShadow: '0 10px 30px rgba(15,23,42,0.12)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            cursor: 'pointer',
+          }}
+        >
+          <svg style={{ width: 14, height: 14 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1" />
+          </svg>
+          Sign out
+        </button>
+        {children}
+      </>
+    )
+  }
 
   return (
     <div style={{
