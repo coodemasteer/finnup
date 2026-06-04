@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import LoginGate from '@/components/LoginGate'
 import Overview from '@/components/Overview'
 import Lenders from '@/components/Lenders'
 import LenderMatching from '@/components/LenderMatching'
@@ -91,6 +92,7 @@ export default function Home() {
   }
 
   return (
+    <LoginGate>
     <div style={{ minHeight: '100vh', background: '#F0F4F8' }}>
 
       {/* ── Hero Header ── */}
@@ -158,5 +160,6 @@ export default function Home() {
         </p>
       </footer>
     </div>
+    </LoginGate>
   )
 }
