@@ -36,11 +36,12 @@ _score_percentiles: dict | None = None  # score distribution thresholds saved at
 
 
 def _get_floor() -> float:
-    """Return recommendation floor = max(1.5 × training approval rate, 0.05).
-    Falls back to 0.12 if training stats not available yet."""
+    """Return recommendation floor = training approval rate.
+    Any borrower above the dataset's own average is eligible for recommendations.
+    Falls back to 0.086 (dataset average) if training stats not available yet."""
     if _approval_rate is not None:
-        return max(round(_approval_rate * 1.5, 4), 0.05)
-    return 0.12   # sensible default until first retrain
+        return max(round(_approval_rate, 4), 0.05)
+    return 0.086   # 8.6% dataset approval rate
 
 
 def clear_cache() -> None:

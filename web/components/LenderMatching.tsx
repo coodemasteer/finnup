@@ -521,11 +521,11 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                   label="P(APPROVED) — XGBoost"
                   value={`${(result.p_approved * 100).toFixed(1)}%`}
                   sub={(() => {
-                    const approvalRate = (result.floor_p ?? 0.1296) / 1.5
+                    const approvalRate = result.floor_p ?? 0.086
                     const ratio = result.p_approved / approvalRate
                     return `Live XGBoost prediction · ${ratio.toFixed(1)}× avg MSME approval rate`
                   })()}
-                  explain={`XGBoost ran predict_proba() on your actual inputs (Net Sales, CIBIL, Vintage, Industry, etc.) and output this probability. It is not a lookup — it is a live inference. The training dataset had an 8.6% approval rate (582/6,735 MSME loans). Must exceed ${((result.floor_p ?? 0.13) * 100).toFixed(0)}% floor. Model accuracy: ROC-AUC 0.773.`}
+                  explain={`XGBoost ran predict_proba() on your actual inputs (Net Sales, CIBIL, Vintage, Industry, etc.) and output this probability. It is not a lookup — it is a live inference. The training dataset had an 8.6% approval rate (582/6,735 MSME loans). Lenders are recommended when score exceeds the ${((result.floor_p ?? 0.086) * 100).toFixed(1)}% dataset average. Model accuracy: ROC-AUC 0.773.`}
                   gradient={approvalGradient}
                 />
                 {/* Credit Tier badge */}
@@ -632,10 +632,10 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
             )}
 
             {/* ── Floor warning ── */}
-            {result.p_approved < (result.floor_p ?? 0.20) && (() => {
-              const floorP       = result.floor_p ?? 0.13
-              const baseRate     = floorP / 1.5
-              const isBorderline = result.p_approved >= baseRate
+            {result.p_approved < (result.floor_p ?? 0.086) && (() => {
+              const floorP       = result.floor_p ?? 0.086
+              const baseRate     = floorP
+              const isBorderline = false  // floor IS the dataset average — below it means genuinely below average
               const gapPp        = ((floorP - result.p_approved) * 100).toFixed(1)
               const bgColor      = isBorderline ? '#FFFBEB' : '#FEF2F2'
               const borderClr    = isBorderline ? '#FDE68A' : '#FECACA'
@@ -661,9 +661,8 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                         Addressing the borderline factors below could push the score over the threshold.
                       </>
                     : <>
-                        No lenders recommended. The ML model assessed this borrower as genuinely high credit risk (below
-                        the {(baseRate * 100).toFixed(1)}% dataset average). Floor is set dynamically at{' '}
-                        <strong>1.5× the training approval rate</strong> ({(floorP * 100).toFixed(0)}%) — not a fixed threshold.
+                        No lenders recommended. This borrower scores below the dataset&apos;s {(baseRate * 100).toFixed(1)}% average approval rate — the model sees this as below-average credit quality.
+                        The floor is set dynamically to the training approval rate ({(floorP * 100).toFixed(1)}%), not a fixed threshold. Improving CIBIL, reducing overdue accounts, or increasing vintage can raise the score.
                       </>}
                 </p>
 
