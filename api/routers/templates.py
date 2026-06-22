@@ -73,6 +73,9 @@ SAMPLE_ROW_2 = [
     0, 0, 0, 0, "All filed", "Partially filed", "Rented",
 ]
 
+# Mapping from Excel display header → API column name used by the parsers
+_DISPLAY_TO_API = {c[1]: c[0] for c in COLUMNS}
+
 
 # ── Styling helpers ────────────────────────────────────────────────────────────
 NAVY   = "1B3A6B"
@@ -190,6 +193,9 @@ def _parse_df(contents: bytes) -> pd.DataFrame:
     except Exception:
         buf.seek(0)
         df = pd.read_csv(buf, header=0)
+
+    # Normalise display column names → API names so all downstream .get() calls work
+    df = df.rename(columns=_DISPLAY_TO_API)
 
     # If 2nd row looks like a description row (non-numeric in numeric columns), drop it
     if not df.empty:
