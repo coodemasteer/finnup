@@ -41,9 +41,10 @@ export default function BatchScore({ onNavigate }: { onNavigate?: (tab: string, 
   const [uploadSource, setUploadSource] = useState<'dataset' | 'upload'>('dataset')
   const PAGE_SIZE = 50
 
-  // Auto-load dataset scores on first mount so results are visible on any device/session
+  // Auto-load dataset scores on first mount — delay 3 s so FastAPI is ready
   useEffect(() => {
-    runBatch()
+    const t = setTimeout(runBatch, 3000)
+    return () => clearTimeout(t)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function runBatch() {
