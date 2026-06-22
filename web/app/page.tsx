@@ -148,7 +148,10 @@ export default function Home() {
         {active === 'lenders' && <Lenders />}
         {active === 'match'    && <LenderMatching prefill={matchPrefill} />}
         {active === 'train'    && <TrainModel />}
-        {active === 'batch'    && <BatchScore onNavigate={navigateTo} />}
+        {/* BatchScore stays mounted once visited so uploaded data is never lost on tab switch */}
+        <div style={{ display: active === 'batch' ? 'block' : 'none' }}>
+          <BatchScore onNavigate={navigateTo} />
+        </div>
         {active === 'diagrams'  && <ModelDiagrams />}
         {active === 'analysis'  && <LoanAnalysis />}
       </main>

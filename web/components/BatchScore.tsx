@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AILoader, { AISpinner } from './AILoader'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine
@@ -40,6 +40,11 @@ export default function BatchScore({ onNavigate }: { onNavigate?: (tab: string, 
   const [page, setPage] = useState(0)
   const [uploadSource, setUploadSource] = useState<'dataset' | 'upload'>('dataset')
   const PAGE_SIZE = 50
+
+  // Auto-load dataset scores on first mount so results are visible on any device/session
+  useEffect(() => {
+    runBatch()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function runBatch() {
     setLoading(true); setError(null); setData(null)
