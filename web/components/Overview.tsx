@@ -237,6 +237,7 @@ async function batchScore(file) {
       <nav style={{ position: 'sticky', top: '1rem' }}>
         <div style={{ background: 'white', borderRadius: '0.875rem', border: '1px solid #E2E8F0', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
           {[
+            ['#team',         '👥 Team'],
             ['#architecture', '🏗 Architecture'],
             ['#single',       '👤 Single Borrower'],
             ['#batch',        '📋 Batch Scoring'],
@@ -266,6 +267,68 @@ async function batchScore(file) {
 
       {/* ── Main content ── */}
       <div>
+
+        {/* ── Team ── */}
+        {(() => {
+          const TEAM = [
+            { name: 'Anil',    focus: 'Feature engineering, API development, code review' },
+            { name: 'Asha',    focus: 'EDA review, feature validation, UAT testing' },
+            { name: 'Arvind',  focus: 'Lender policy review, integration support, final report' },
+            { name: 'Bhupesh', focus: 'Data augmentation, lender policy confirmation, API testing' },
+            { name: 'Deepak',  focus: 'Label creation, feature selection, FinnUp integration lead' },
+            { name: 'Ganesh',  focus: 'Data lead, model training, project coordination' },
+            { name: 'Gopal',   focus: 'Model training, Stage 2 lender ranking, results review' },
+            { name: 'Hareram', focus: 'Bank data / AA consent, API development, infrastructure' },
+            { name: 'Pranali', focus: 'Feature engineering lead, imputation pipeline, peer review' },
+            { name: 'Rahul',   focus: 'Model training lead, XGBoost + SHAP, model card author' },
+            { name: 'Samik',   focus: 'Stage 2 ranking, end-to-end testing, presentation prep' },
+            { name: 'Savitha', focus: 'Data validation, model card review, final report' },
+            { name: 'Sonam',   focus: 'Label creation, feature engineering, FinnUp integration support' },
+          ]
+          const COLORS = [
+            '#1B3A6B','#0D9488','#7C3AED','#B45309','#0369A1',
+            '#065F46','#9D174D','#1D4ED8','#6D28D9','#047857',
+            '#92400E','#1E40AF','#5B21B6',
+          ]
+          return (
+            <section style={{ marginBottom: '2rem' }}>
+              <div style={{ background: 'linear-gradient(135deg,#1B3A6B 0%,#0D9488 100%)', borderRadius: '1.25rem', padding: '1.75rem 2rem', marginBottom: '0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '1.25rem' }}>
+                  <span style={{ fontSize: '1.25rem' }}>👥</span>
+                  <h2 style={{ margin: 0, fontSize: '1.0625rem', fontWeight: 800, color: 'white', letterSpacing: '-0.01em' }}>
+                    Team — FinnUp MSME Credit Intelligence
+                  </h2>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(195px, 1fr))', gap: '0.75rem' }}>
+                  {TEAM.map((m, i) => (
+                    <div key={m.name} style={{
+                      background: 'rgba(255,255,255,0.10)',
+                      border: '1px solid rgba(255,255,255,0.18)',
+                      borderRadius: '0.875rem',
+                      padding: '0.875rem 1rem',
+                      backdropFilter: 'blur(8px)',
+                      display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+                    }}>
+                      <div style={{
+                        width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
+                        background: COLORS[i % COLORS.length],
+                        border: '2px solid rgba(255,255,255,0.35)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.875rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em',
+                      }}>
+                        {m.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'white', marginBottom: '0.2rem' }}>{m.name}</div>
+                        <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.72)', lineHeight: 1.45 }}>{m.focus}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )
+        })()}
 
         {/* ── Architecture ── */}
         <Section title="🏗 Architecture — How the System Works">
