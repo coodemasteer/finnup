@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import AILoader, { AISpinner } from './AILoader'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine
@@ -40,12 +40,6 @@ export default function BatchScore({ onNavigate }: { onNavigate?: (tab: string, 
   const [page, setPage] = useState(0)
   const [uploadSource, setUploadSource] = useState<'dataset' | 'upload'>('dataset')
   const PAGE_SIZE = 50
-
-  // Auto-load dataset scores on first mount — delay 3 s so FastAPI is ready
-  useEffect(() => {
-    const t = setTimeout(runBatch, 3000)
-    return () => clearTimeout(t)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function runBatch() {
     setLoading(true); setError(null); setData(null)

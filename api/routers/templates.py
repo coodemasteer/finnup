@@ -40,7 +40,7 @@ COLUMNS = [
     ("company_name",       "Company Name",                     "DEMO Corp",                     "Text (optional)"),
     ("product_name",       "Product Name",                     "Unsecured Business Loan",        "Unsecured Business Loan / Term Loan / Cash Credit/WCDL / LAP / Personal Loan / Housing Loan / Bill Discounting / Purchase Financing / Overdraft Facility"),
     ("location",           "Location (City)",                  "Mumbai",                        "Text — city name"),
-    ("entity_type",        "Type of Entity",                   "Sole Proprietorship",            "Sole Proprietorship / Private Limited / Partnership / LLP / Public Limited"),
+    ("entity_type",        "Type of Entity",                   "Sole Proprietorship",            "Sole Proprietorship / Private Limited Company / Public Limited Company / Partnership / Limited Liability Partnership / Co-Operative / Individual"),
     ("loan_min_lakhs",     "Loan Amount Min (₹ Lakhs)",         8,                              "Numeric — in Lakhs (e.g. 8 = ₹8 Lakh)"),
     ("loan_max_lakhs",     "Loan Amount Max (₹ Lakhs)",        75,                              "Numeric — in Lakhs"),
     ("tenor_min_months",   "Tenor Min (months)",               12,                              "Numeric — e.g. 12 for 1 year"),
@@ -62,8 +62,8 @@ COLUMNS = [
     ("outward_bounces",    "Outward Cheque Bounces",           0,                               "Numeric — count"),
     ("enquiries_30d",      "Credit Enquiries (last 30 days)",  1,                               "Numeric — count"),
     ("new_sanctions_30d",  "New Sanctions (last 30 days)",     0,                               "Numeric — count"),
-    ("gst_filing_3mo",     "GST Filing (last 3 months)",       "All filed",                     "All filed / Partially filed / Not filed"),
-    ("gst_filing_6mo",     "GST Filing (last 6 months)",       "All filed",                     "All filed / Partially filed / Not filed"),
+    ("gst_filing_3mo",     "GST Filing (last 3 months)",        "All filed",                     "All filed / 1 or 2 filed"),
+    ("gst_filing_6mo",     "GST Filing (last 6 months)",        "All filed",                     "All filed / 1 or 2 not filed"),
     ("property_owned",     "Owned / Rented Property",          "Owned",                         "Owned / Rented"),
 ]
 
@@ -228,11 +228,58 @@ async def parse_single_excel(file: UploadFile = File(...)):
             return default
         return val
 
+    # Normalize product_name to a valid dropdown option
+    _RAW_PRODUCT = str(_get("product_name", "Unsecured Business Loan")).strip()
+    _PRODUCT_NORM: dict[str, str] = {
+        "bill discounting/ purchase financing": "Bill Discounting",
+        "bill discounting/purchase financing":  "Bill Discounting",
+        "bill discounting":                     "Bill Discounting",
+        "purchase financing":                   "Purchase Financing",
+        "purchase finance":                     "Purchase Financing",
+        "lap":                                  "Loan Against Property",
+        "loan against property":                "Loan Against Property",
+        "cash credit/wcdl":                     "Cash Credit/WCDL",
+        "cash credit":                          "Cash Credit/WCDL",
+        "wcdl":                                 "Cash Credit/WCDL",
+        "overdraft":                            "Overdraft Facility",
+        "overdraft facility":                   "Overdraft Facility",
+        "term loan":                            "Term Loan",
+        "unsecured business loan":              "Unsecured Business Loan",
+        "personal loan":                        "Personal Loan",
+        "housing loan":                         "Housing Loan",
+    }
+    _product_name = _PRODUCT_NORM.get(_RAW_PRODUCT.lower(), _RAW_PRODUCT)
+
+    # Normalize entity_type to canonical training value
+    _ENTITY_NORM: dict[str, str] = {
+        "llp":                           "Limited Liability Partnership",
+        "limited liability partnership":  "Limited Liability Partnership",
+        "private limited":               "Private Limited Company",
+        "private limited company":       "Private Limited Company",
+        "public limited":                "Public Limited Company",
+        "public limited company":        "Public Limited Company",
+        "sole proprietorship":           "Sole Proprietorship",
+        "partnership":                   "Partnership",
+        "co-operative":                  "Co-Operative",
+        "cooperative":                   "Co-Operative",
+        "individual":                    "Individual",
+    }
+    _raw_entity = str(_get("entity_type", "Sole Proprietorship")).strip()
+    _entity_type = _ENTITY_NORM.get(_raw_entity.lower(), _raw_entity)
+
+    # Normalize GST filing values
+    _raw_gst3 = str(_get("gst_filing_3mo", "All filed")).strip()
+    _gst3 = {"all filed": "All filed", "partially filed": "1 or 2 filed",
+             "not filed": "1 or 2 filed", "1 or 2 filed": "1 or 2 filed"}.get(_raw_gst3.lower(), _raw_gst3)
+    _raw_gst6 = str(_get("gst_filing_6mo", "All filed")).strip()
+    _gst6 = {"all filed": "All filed", "partially filed": "1 or 2 not filed",
+             "not filed": "1 or 2 not filed", "1 or 2 not filed": "1 or 2 not filed"}.get(_raw_gst6.lower(), _raw_gst6)
+
     try:
         result = {
             "company_name":   str(_get("company_name", "")),
-            "entity_type":    str(_get("entity_type", "Sole Proprietorship")),
-            "product_name":   str(_get("product_name", "Unsecured Business Loan")),
+            "entity_type":    _entity_type,
+            "product_name":   _product_name,
             "location":       str(_get("location", "Mumbai")),
             "loan_min":       float(_get("loan_min_lakhs", 8)),
             "loan_max":       float(_get("loan_max_lakhs", 75)),
@@ -255,8 +302,8 @@ async def parse_single_excel(file: UploadFile = File(...)):
             "outward_bounces":int(float(_get("outward_bounces", 0))),
             "enq30":          int(float(_get("enquiries_30d", 1))),
             "ns30":           int(float(_get("new_sanctions_30d", 0))),
-            "gst3":           str(_get("gst_filing_3mo", "All filed")),
-            "gst6":           str(_get("gst_filing_6mo", "All filed")),
+            "gst3":           _gst3,
+            "gst6":           _gst6,
             "owned":          str(_get("property_owned", "Owned")),
         }
     except Exception as exc:
@@ -288,39 +335,41 @@ async def batch_score_from_upload(file: UploadFile = File(...)):
     if df_raw.empty:
         raise HTTPException(status_code=400, detail="Uploaded file has no data rows.")
 
-    # Map actual template display column names → raw column names expected by engineer_features
-    rename_map = {
-        "Company Name":                    "company_name",
-        "Product Name":                    "product_name",
-        "Location (City)":                 "location",
-        # "Type of Entity" unchanged
-        "Tenor Min (months)":              "Tenor Min",
-        "Tenor Max (months)":              "Tenor Max",
-        "DPD 90+ (last 12 months)":        "cnt_dpd_90plus_last_12mo",
-        "Total Overdue Amount (\u20b9)":    "Total Overdue Amount",
-        "Suit Filed Count":                "Suit Filed Count of Loans",
-        "Business Vintage (months)":       "Vintage (in months)",
-        "Age of Applicant (years)":        "Age of applicant",
-        "DSCR (Debt Service Coverage)":    "DSCR (Avg/Min)",
-        "TOL / TNW Ratio":                 "TOL/ TNW",
-        "Inward Cheque Bounces":           "Total Number of Inward cheque bounces",
-        "Outward Cheque Bounces":          "Total Number of Outward cheque bounces",
-        "Credit Enquiries (last 30 days)": "enquiry_last30days",
-        "New Sanctions (last 30 days)":    "New sanction in the last 30 days",
-        "GST Filing (last 3 months)":      "GST Filing in the past 3 months",
-        "GST Filing (last 6 months)":      "GST Filing in the past 6 months",
-        "Owned / Rented Property":         "Owned/Rented Property",
+    df = df_raw.copy()
+
+    # _parse_df already applied _DISPLAY_TO_API so columns are now API names.
+    # Rename API names → raw column names expected by engineer_features.
+    api_to_raw = {
+        "entity_type":      "Type of Entity",
+        "cibil_score":      "CIBIL Score",
+        "dpd90":            "cnt_dpd_90plus_last_12mo",
+        "overdue_accounts": "Count of Overdue Accounts",
+        "overdue_amount":   "Total Overdue Amount",
+        "suit_filed":       "Suit Filed Count of Loans",
+        "vintage_months":   "Vintage (in months)",
+        "age_applicant":    "Age of applicant",
+        "dscr":             "DSCR (Avg/Min)",
+        "current_ratio":    "Current Ratio",
+        "tol_tnw":          "TOL/ TNW",
+        "inward_bounces":   "Total Number of Inward cheque bounces",
+        "outward_bounces":  "Total Number of Outward cheque bounces",
+        "enquiries_30d":    "enquiry_last30days",
+        "new_sanctions_30d": "New sanction in the last 30 days",
+        "gst_filing_3mo":   "GST Filing in the past 3 months",
+        "gst_filing_6mo":   "GST Filing in the past 6 months",
+        "property_owned":   "Owned/Rented Property",
+        "tenor_min_months": "Tenor Min",
+        "tenor_max_months": "Tenor Max",
     }
+    df = df.rename(columns=api_to_raw)
 
-    df = df_raw.rename(columns=rename_map)
-
-    # Convert Lakh columns → ₹
+    # Convert Lakh columns → ₹ (columns are now API names after _parse_df)
     for lakh_col, raw_col in [
-        ("Loan Amount Min (\u20b9 Lakhs)",  "Loan Amount Min"),
-        ("Loan Amount Max (\u20b9 Lakhs)",  "Loan Amount Max"),
-        ("Net Sales (\u20b9 Lakhs)",        "Net Sales"),
-        ("Profit After Tax (\u20b9 Lakhs)", "Profit After Tax"),
-        ("Tangible Networth (\u20b9 Lakhs)", "Tangible Networth (TNW)"),
+        ("loan_min_lakhs",  "Loan Amount Min"),
+        ("loan_max_lakhs",  "Loan Amount Max"),
+        ("net_sales_lakhs", "Net Sales"),
+        ("pat_lakhs",       "Profit After Tax"),
+        ("tnw_lakhs",       "Tangible Networth (TNW)"),
     ]:
         if lakh_col in df.columns:
             df[raw_col] = pd.to_numeric(df[lakh_col], errors="coerce").fillna(0) * 100_000

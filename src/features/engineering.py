@@ -314,6 +314,48 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 np.abs(df[col])
             )
 
+    # ── Normalise entity_type variants → canonical training values ─────────────
+    _ENTITY_MAP = {
+        "llp":                          "Limited Liability Partnership",
+        "limited liability partnership": "Limited Liability Partnership",
+        "private limited":              "Private Limited Company",
+        "private limited company":      "Private Limited Company",
+        "public limited":               "Public Limited Company",
+        "public limited company":       "Public Limited Company",
+        "sole proprietorship":          "Sole Proprietorship",
+        "partnership":                  "Partnership",
+        "co-operative":                 "Co-Operative",
+        "cooperative":                  "Co-Operative",
+        "individual":                   "Individual",
+    }
+    if "Type of Entity" in df.columns:
+        _col = df["Type of Entity"].fillna("").astype(str).str.strip()
+        df["Type of Entity"] = _col.map(
+            lambda x: _ENTITY_MAP.get(x.lower(), x) if x else x
+        )
+
+    # ── Normalise GST filing variants → canonical training values ────────────
+    _GST3_MAP = {
+        "all filed":        "All filed",
+        "partially filed":  "1 or 2 filed",
+        "not filed":        "1 or 2 filed",
+        "1 or 2 filed":     "1 or 2 filed",
+    }
+    _GST6_MAP = {
+        "all filed":             "All filed",
+        "partially filed":       "1 or 2 not filed",
+        "not filed":             "1 or 2 not filed",
+        "1 or 2 not filed":      "1 or 2 not filed",
+    }
+    _gst3_col = "GST Filing in the past 3 months"
+    _gst6_col = "GST Filing in the past 6 months"
+    if _gst3_col in df.columns:
+        _c3 = df[_gst3_col].fillna("").astype(str).str.strip()
+        df[_gst3_col] = _c3.map(lambda x: _GST3_MAP.get(x.lower(), x) if x else x)
+    if _gst6_col in df.columns:
+        _c6 = df[_gst6_col].fillna("").astype(str).str.strip()
+        df[_gst6_col] = _c6.map(lambda x: _GST6_MAP.get(x.lower(), x) if x else x)
+
     # ── Normalise product_name variants → canonical training values ─────────
     _PRODUCT_MAP = {
         "Bill Discounting":              "Bill Discounting/ Purchase financing",

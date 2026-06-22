@@ -311,14 +311,18 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
 
           <Field label="Type of Entity">
             <select className="form-select" value={form.entity_type} onChange={e => set('entity_type', e.target.value)}>
-              {['Sole Proprietorship','Private Limited','Partnership','LLP','Public Limited'].map(o => <option key={o}>{o}</option>)}
+              {['Sole Proprietorship','Private Limited Company','Public Limited Company',
+                'Partnership','Limited Liability Partnership','Co-Operative','Individual'].map(o => <option key={o}>{o}</option>)}
             </select>
           </Field>
 
           <Field label="Loan Product">
             <select className="form-select" value={form.product_name} onChange={e => set('product_name', e.target.value)}>
               {['Unsecured Business Loan','Personal Loan','Cash Credit/WCDL','Term Loan',
-                'Bill Discounting','Purchase Financing','Loan Against Property','Overdraft Facility','Housing Loan']
+                'Bill Discounting','Purchase Financing','Invoice discounting',
+                'Lease Rent Discounting','Loan Against Property','Overdraft Facility',
+                'Non Fund Based (LC/BG)','Project Finance','Revenue Based Finance',
+                'Non Convertable Debentures','Housing Loan']
                 .map(o => <option key={o}>{o}</option>)}
             </select>
           </Field>
@@ -428,12 +432,12 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <Field label="GST Filing (3 mo)" hint="GST compliance last 3 months.">
               <select className="form-select" value={form.gst3} onChange={e => set('gst3', e.target.value)}>
-                {['All filed','Partially filed','Not filed'].map(o => <option key={o}>{o}</option>)}
+                {['All filed','1 or 2 filed'].map(o => <option key={o}>{o}</option>)}
               </select>
             </Field>
             <Field label="GST Filing (6 mo)" hint="GST compliance last 6 months. Non-compliance is a red flag — suggests unreported revenue or weak business activity.">
               <select className="form-select" value={form.gst6} onChange={e => set('gst6', e.target.value)}>
-                {['All filed','Partially filed','Not filed'].map(o => <option key={o}>{o}</option>)}
+                {['All filed','1 or 2 not filed'].map(o => <option key={o}>{o}</option>)}
               </select>
             </Field>
           </div>
