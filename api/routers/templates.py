@@ -38,7 +38,7 @@ def _get_policies() -> "pd.DataFrame":
 # ── Column definitions ─────────────────────────────────────────────────────────
 COLUMNS = [
     ("company_name",       "Company Name",                     "DEMO Corp",                     "Text (optional)"),
-    ("product_name",       "Product Name",                     "Unsecured Business Loan",        "Unsecured Business Loan / Term Loan / Cash Credit/WCDL / LAP / Personal Loan / Housing Loan / Bill Discounting / Overdraft Facility"),
+    ("product_name",       "Product Name",                     "Unsecured Business Loan",        "Unsecured Business Loan / Term Loan / Cash Credit/WCDL / LAP / Personal Loan / Housing Loan / Bill Discounting / Purchase Financing / Overdraft Facility"),
     ("location",           "Location (City)",                  "Mumbai",                        "Text — city name"),
     ("entity_type",        "Type of Entity",                   "Sole Proprietorship",            "Sole Proprietorship / Private Limited / Partnership / LLP / Public Limited"),
     ("loan_min_lakhs",     "Loan Amount Min (₹ Lakhs)",         8,                              "Numeric — in Lakhs (e.g. 8 = ₹8 Lakh)"),

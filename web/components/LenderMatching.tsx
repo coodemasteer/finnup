@@ -318,7 +318,7 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
           <Field label="Loan Product">
             <select className="form-select" value={form.product_name} onChange={e => set('product_name', e.target.value)}>
               {['Unsecured Business Loan','Personal Loan','Cash Credit/WCDL','Term Loan',
-                'Bill Discounting/ Purchase financing','Loan Against Property','Overdraft Facility','Housing Loan']
+                'Bill Discounting','Purchase Financing','Loan Against Property','Overdraft Facility','Housing Loan']
                 .map(o => <option key={o}>{o}</option>)}
             </select>
           </Field>
@@ -517,32 +517,17 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
             {/* ── Metric cards ── */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.875rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {(() => {
-                  const approvalRate = result.floor_p ?? 0.086
-                  const ratio = result.p_approved / approvalRate
-                  const approvalStrength = result.score_percentile != null
-                    ? Math.max(1, Math.min(99, 100 - result.score_percentile))
-                    : Math.max(1, Math.min(99, Math.round(ratio * 50)))
-                  const strengthBand = approvalStrength >= 80
-                    ? 'Exceptional'
-                    : approvalStrength >= 70
-                      ? 'Strong'
-                      : approvalStrength >= 55
-                        ? 'Good'
-                        : approvalStrength >= 40
-                          ? 'Borderline'
-                          : 'Weak'
-
-                  return (
                 <MetricCard
-                  label="Approval Strength — XGBoost"
-                  value={`${approvalStrength}/100`}
-                  sub={`${strengthBand} borrower profile · Raw approval probability ${(result.p_approved * 100).toFixed(1)}%`}
-                  explain={`This is the presentation-friendly score for cohort review. ${approvalStrength}/100 means this borrower scores better than roughly ${approvalStrength}% of historical applicants in the training dataset. The raw XGBoost probability is still ${(result.p_approved * 100).toFixed(1)}%, but because the dataset approval rate is only 8.6%, even a 10-20% raw probability can represent a strong borrower. Lenders are recommended when the borrower beats the ${((result.floor_p ?? 0.086) * 100).toFixed(1)}% dataset average. Model accuracy: ROC-AUC 0.773.`}
+                  label="P(APPROVED) — XGBoost"
+                  value={`${(result.p_approved * 100).toFixed(1)}%`}
+                  sub={(() => {
+                    const approvalRate = (result.floor_p ?? 0.1296) / 1.5
+                    const ratio = result.p_approved / approvalRate
+                    return `Live XGBoost prediction · ${ratio.toFixed(1)}× avg MSME approval rate`
+                  })()}
+                  explain={`XGBoost ran predict_proba() on your actual inputs (Net Sales, CIBIL, Vintage, Industry, etc.) and output this probability. It is not a lookup — it is a live inference. The training dataset had an 8.6% approval rate (582/6,735 MSME loans). Must exceed ${((result.floor_p ?? 0.13) * 100).toFixed(0)}% floor. Model accuracy: ROC-AUC 0.773.`}
                   gradient={approvalGradient}
                 />
-                  )
-                })()}
                 {/* Credit Tier badge */}
                 {result.credit_tier && (
                   <div style={{ background: 'white', border: '1.5px solid #E2E8F0', borderRadius: '0.75rem', padding: '0.625rem 1rem' }}>
@@ -556,7 +541,7 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                       </div>
                     )}
                     <div style={{ fontSize: '0.6rem', color: '#CBD5E1', marginTop: 3, lineHeight: 1.4 }}>
-                      For presentations, use Approval Strength as the headline number. Raw model probabilities stay low because this is an imbalanced MSME dataset with only 8.6% historical approvals.
+                      Note: 18% is realistic for a calibrated model on 8.6% approval data. Good borrowers in this dataset typically score 15–35%, not 70–80%.
                     </div>
                   </div>
                 )}
@@ -647,10 +632,10 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
             )}
 
             {/* ── Floor warning ── */}
-            {result.p_approved < (result.floor_p ?? 0.086) && (() => {
-              const floorP       = result.floor_p ?? 0.086
-              const baseRate     = floorP
-              const isBorderline = false  // floor IS the dataset average — below it means genuinely below average
+            {result.p_approved < (result.floor_p ?? 0.20) && (() => {
+              const floorP       = result.floor_p ?? 0.13
+              const baseRate     = floorP / 1.5
+              const isBorderline = result.p_approved >= baseRate
               const gapPp        = ((floorP - result.p_approved) * 100).toFixed(1)
               const bgColor      = isBorderline ? '#FFFBEB' : '#FEF2F2'
               const borderClr    = isBorderline ? '#FDE68A' : '#FECACA'
@@ -676,8 +661,9 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                         Addressing the borderline factors below could push the score over the threshold.
                       </>
                     : <>
-                        No lenders recommended. This borrower scores below the dataset&apos;s {(baseRate * 100).toFixed(1)}% average approval rate — the model sees this as below-average credit quality.
-                        The floor is set dynamically to the training approval rate ({(floorP * 100).toFixed(1)}%), not a fixed threshold. Improving CIBIL, reducing overdue accounts, or increasing vintage can raise the score.
+                        No lenders recommended. The ML model assessed this borrower as genuinely high credit risk (below
+                        the {(baseRate * 100).toFixed(1)}% dataset average). Floor is set dynamically at{' '}
+                        <strong>1.5× the training approval rate</strong> ({(floorP * 100).toFixed(0)}%) — not a fixed threshold.
                       </>}
                 </p>
 
@@ -1011,7 +997,7 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
             </div>
 
             {/* ── XAI Section ── */}
-            {(result.shap || result.lime || result.bullets) && (
+            {(result.shap || result.lime) && (
               <div className="card">
                 <h3 style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1B3A6B', marginBottom: '1rem' }}>
                   Why this score? — SHAP &amp; LIME Explanations
@@ -1077,38 +1063,6 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                   </>
                 )}
 
-                {xaiTab === 'shap' && (!result.shap || result.shap.length === 0) && (
-                  <div style={{
-                    background: '#FFF7ED',
-                    border: '1px solid #FED7AA',
-                    borderRadius: '0.875rem',
-                    padding: '1rem 1.125rem',
-                  }}>
-                    <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#9A3412', marginBottom: '0.35rem' }}>
-                      SHAP report is not available for this prediction yet
-                    </p>
-                    <p style={{ fontSize: '0.76rem', color: '#9A3412', lineHeight: 1.6, marginBottom: result.bullets ? '0.875rem' : 0 }}>
-                      The prediction completed, but the signed feature-attribution chart was not returned by the backend for this run.
-                      The business explanation below is still derived from the same model inputs.
-                    </p>
-                    {result.bullets && result.bullets.length > 0 && (
-                      <div style={{ background: 'white', borderRadius: '0.75rem', padding: '0.875rem 1rem', border: '1px solid #FFEDD5' }}>
-                        <h4 style={{ fontWeight: 700, fontSize: '0.8rem', color: '#1B3A6B', marginBottom: '0.55rem' }}>
-                          Available explanation summary
-                        </h4>
-                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingLeft: 0, listStyle: 'none', margin: 0 }}>
-                          {result.bullets.map((b, i) => (
-                            <li key={i} style={{ fontSize: '0.82rem', color: '#334155', display: 'flex', gap: '0.5rem' }}>
-                              <span style={{ color: '#0D9488', flexShrink: 0 }}>→</span>
-                              <span dangerouslySetInnerHTML={{ __html: b.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 {xaiTab === 'lime' && result.lime && (
                   <>
                     <p style={{ fontSize: '0.78rem', color: '#64748B', marginBottom: '1rem' }}>
@@ -1141,23 +1095,6 @@ export default function LenderMatching({ prefill }: { prefill?: MatchPrefill | n
                       </span>
                     </div>
                   </>
-                )}
-
-                {xaiTab === 'lime' && (!result.lime || result.lime.length === 0) && (
-                  <div style={{
-                    background: '#F8FAFC',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '0.875rem',
-                    padding: '1rem 1.125rem',
-                  }}>
-                    <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1E293B', marginBottom: '0.35rem' }}>
-                      LIME report is not available for this prediction yet
-                    </p>
-                    <p style={{ fontSize: '0.76rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
-                      The local perturbation-based explanation did not come back from the backend for this run.
-                      Once the deployment finishes rebuilding with the restored explainability dependencies, this chart should return automatically.
-                    </p>
-                  </div>
                 )}
               </div>
             )}

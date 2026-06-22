@@ -314,6 +314,23 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 np.abs(df[col])
             )
 
+    # ── Normalise product_name variants → canonical training values ─────────
+    _PRODUCT_MAP = {
+        "Bill Discounting":              "Bill Discounting/ Purchase financing",
+        "Purchase Financing":            "Bill Discounting/ Purchase financing",
+        "Purchase financing":            "Bill Discounting/ Purchase financing",
+        "bill discounting":              "Bill Discounting/ Purchase financing",
+        "purchase financing":            "Bill Discounting/ Purchase financing",
+        "Bill Discounting/Purchase financing": "Bill Discounting/ Purchase financing",
+        "Bill discounting/ Purchase financing": "Bill Discounting/ Purchase financing",
+        "LAP":                           "Loan Against Property",
+        "Cash Credit":                   "Cash Credit/WCDL",
+        "WCDL":                          "Cash Credit/WCDL",
+        "Overdraft":                     "Overdraft Facility",
+    }
+    if "product_name" in df.columns:
+        df["product_name"] = df["product_name"].astype(str).str.strip().replace(_PRODUCT_MAP)
+
     # ── One-hot encode categoricals ───────────────────────────────────────────
     for col in CATEGORICAL_COLS:
         if col in df.columns:
