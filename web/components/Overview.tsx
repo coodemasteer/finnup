@@ -108,7 +108,13 @@ export default function Overview() {
   const [apiTab, setApiTab] = useState<'curl' | 'python' | 'js'>('curl')
   const [ms, setMs] = useState<ModelStatus | null>(null)
 
-  const BASE = 'http://localhost:8080'
+  // BASE = '' uses relative paths → Next.js proxy (next.config.js) forwards to
+  // FastAPI internally. Works both locally (127.0.0.1:8080) and in production
+  // (https://coodmasteer-finnup.hf.space) without any code change.
+  const BASE = ''
+  // DISPLAY_BASE is shown in copy-pasteable code snippets so users can call
+  // the deployed API directly from their own machines.
+  const DISPLAY_BASE = 'https://coodmasteer-finnup.hf.space'
 
   useEffect(() => {
     fetch(`${BASE}/api/model-status`)
@@ -123,7 +129,7 @@ export default function Overview() {
       .catch(() => {})
   }, [])
 
-  const CURL_SINGLE = `curl -X POST "${BASE}/api/match" \\
+  const CURL_SINGLE = `curl -X POST "${DISPLAY_BASE}/api/match" \\
   -H "Content-Type: application/json" \\
   -d '{
     "company_name": "Sunshine Exports Pvt Ltd",
@@ -138,20 +144,20 @@ export default function Overview() {
   }'`
 
   const CURL_MINIMAL = `# All fields have defaults — an empty body is valid
-curl -X POST "${BASE}/api/match" \\
+curl -X POST "${DISPLAY_BASE}/api/match" \\
   -H "Content-Type: application/json" \\
   -d '{}'`
 
   const CURL_BATCH = `# Score a file of borrowers — upload an Excel or CSV
-curl -X POST "${BASE}/api/batch-score-upload" \\
+curl -X POST "${DISPLAY_BASE}/api/batch-score-upload" \\
   -F "file=@/path/to/borrowers.xlsx"
 
 # Score all rows in the training dataset (no file needed)
-curl "${BASE}/api/batch-score"`
+curl "${DISPLAY_BASE}/api/batch-score"`
 
   const PYTHON_CODE = `import requests
 
-BASE = "${BASE}"
+BASE = "${DISPLAY_BASE}"
 
 # ── Single borrower ───────────────────────────────────────────────
 payload = {
@@ -192,7 +198,7 @@ with open("borrowers.xlsx", "rb") as f:
 for row in resp.json().get("rows", []):
     print(row.get("company_name"), "→", row.get("top_lender"), f"P={row.get('p_approved', 0)*100:.1f}%")`
 
-  const JS_CODE = `const BASE = '${BASE}';
+  const JS_CODE = `const BASE = '${DISPLAY_BASE}';
 
 // ── Single borrower ─────────────────────────────────────────────
 async function matchLender(borrower = {}) {
@@ -256,10 +262,10 @@ async function batchScore(file) {
         </div>
         <div style={{ background: '#F0FDFA', border: '1px solid #99F6E4', borderRadius: '0.875rem', padding: '0.875rem', marginTop: '1rem', fontSize: '0.72rem', color: '#0F766E', lineHeight: 1.6 }}>
           <strong>Docs:</strong><br />
-          <a href="http://localhost:8080/docs" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>
+          <a href="https://coodmasteer-finnup.hf.space/docs" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>
             Swagger UI →
           </a><br />
-          <a href="http://localhost:8080/redoc" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>
+          <a href="https://coodmasteer-finnup.hf.space/redoc" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>
             ReDoc →
           </a>
         </div>
@@ -549,12 +555,12 @@ async function batchScore(file) {
           <div id="api">
             <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '0.875rem', padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
               <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', margin: '0 0 0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Base URL</p>
-              <code style={{ fontSize: '0.9rem', color: '#0D9488', fontFamily: 'monospace', fontWeight: 700 }}>http://localhost:8080</code>
+              <code style={{ fontSize: '0.9rem', color: '#0D9488', fontFamily: 'monospace', fontWeight: 700 }}>https://coodmasteer-finnup.hf.space</code>
               <p style={{ fontSize: '0.72rem', color: '#94A3B8', margin: '0.375rem 0 0' }}>
                 Interactive docs at{' '}
-                <a href="http://localhost:8080/docs" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>localhost:8080/docs</a>
+                <a href="https://coodmasteer-finnup.hf.space/docs" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>coodmasteer-finnup.hf.space/docs</a>
                 {' '}(Swagger UI) and{' '}
-                <a href="http://localhost:8080/redoc" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>localhost:8080/redoc</a>
+                <a href="https://coodmasteer-finnup.hf.space/redoc" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>coodmasteer-finnup.hf.space/redoc</a>
               </p>
             </div>
 
