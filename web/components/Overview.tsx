@@ -262,10 +262,10 @@ async function batchScore(file) {
         </div>
         <div style={{ background: '#F0FDFA', border: '1px solid #99F6E4', borderRadius: '0.875rem', padding: '0.875rem', marginTop: '1rem', fontSize: '0.72rem', color: '#0F766E', lineHeight: 1.6 }}>
           <strong>Docs:</strong><br />
-          <a href="https://coodmasteer-finnup.hf.space/docs" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>
+          <a href="https://coodmasteer-finnup.hf.space/api/docs" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>
             Swagger UI →
           </a><br />
-          <a href="https://coodmasteer-finnup.hf.space/redoc" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>
+          <a href="https://coodmasteer-finnup.hf.space/api/redoc" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>
             ReDoc →
           </a>
         </div>
@@ -558,9 +558,9 @@ async function batchScore(file) {
               <code style={{ fontSize: '0.9rem', color: '#0D9488', fontFamily: 'monospace', fontWeight: 700 }}>https://coodmasteer-finnup.hf.space</code>
               <p style={{ fontSize: '0.72rem', color: '#94A3B8', margin: '0.375rem 0 0' }}>
                 Interactive docs at{' '}
-                <a href="https://coodmasteer-finnup.hf.space/docs" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>coodmasteer-finnup.hf.space/docs</a>
+                <a href="https://coodmasteer-finnup.hf.space/api/docs" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>coodmasteer-finnup.hf.space/api/docs</a>
                 {' '}(Swagger UI) and{' '}
-                <a href="https://coodmasteer-finnup.hf.space/redoc" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>coodmasteer-finnup.hf.space/redoc</a>
+                <a href="https://coodmasteer-finnup.hf.space/api/redoc" target="_blank" rel="noreferrer" style={{ color: '#0D9488' }}>coodmasteer-finnup.hf.space/api/redoc</a>
               </p>
             </div>
 

@@ -15,6 +15,11 @@ app = FastAPI(
     title="FinnUp MSME Lender Matching API",
     description="Engine 1 (ML) + Engine 2 (Policy Rules) for MSME loan decisions",
     version="1.0.0",
+    # Serve docs under /api/ so Next.js proxy (/api/:path*) can forward them
+    # in production (HF Space). Without this, /docs hits Next.js → 404.
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
 )
 
 app.add_middleware(
